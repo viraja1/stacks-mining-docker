@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+
+  mining_server:
+    build:
+      context: .
+      dockerfile: Dockerfile_mining_server
+    ports:
+      - "5000:5000"
+      - "20443:20443"
+      - "20444:20444"
+    networks:
+      - stacks
+
+  mining_bot:
+    build:
+      context: .
+      dockerfile: Dockerfile_mining_bot
+    ports:
+      - "8000:8000"
+    networks:
+      - stacks
+    depends_on:
+      - mining_server
+
+
+networks:
+  stacks:
+    driver: bridge

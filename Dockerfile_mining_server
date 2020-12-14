@@ -1,0 +1,47 @@
+FROM debian:stretch
+
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+    ca-certificates curl file git \
+    build-essential \
+    autoconf automake cmake libssl-dev pkg-config autotools-dev libtool xutils-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /usr/local/nvm
+ENV NVM_DIR=/usr/local/nvm
+ENV NODE_VERSION=14.15.0
+RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.0/install.sh | bash \
+    && . $NVM_DIR/nvm.sh \
+    && nvm install $NODE_VERSION \
+    && nvm alias default $NODE_VERSION \
+    && nvm use default
+
+ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
+ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+RUN npm install -g yarn
+
+ENV SSL_VERSION=1.0.2s
+RUN curl https://www.openssl.org/source/openssl-$SSL_VERSION.tar.gz -O && \
+    tar -xzf openssl-$SSL_VERSION.tar.gz && \
+    cd openssl-$SSL_VERSION && ./config && make depend && make install && \
+    cd .. && rm -rf openssl-$SSL_VERSION*
+ENV OPENSSL_LIB_DIR=/usr/local/ssl/lib \
+    OPENSSL_INCLUDE_DIR=/usr/local/ssl/include \
+    OPENSSL_STATIC=1
+
+WORKDIR /app
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH=/root/.cargo/bin:$PATH
+RUN git clone https://github.com/blockstack/stacks-blockchain.git
+WORKDIR /app/stacks-blockchain/
+RUN cargo build --workspace --release --bin stacks-node;
+RUN cp target/release/stacks-node $HOME/.cargo/bin
+
+WORKDIR /app
+RUN git clone https://github.com/Daemon-Technologies/Mining-Local-Server.git
+WORKDIR /app/Mining-Local-Server
+RUN npm install
+
+ENTRYPOINT npm start
