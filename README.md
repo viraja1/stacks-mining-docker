@@ -23,7 +23,7 @@ Read more at https://daemon-technologies.github.io/docs/
    docker-compose -f docker-compose.yml build
    ```
    
-4) Run the containers in background
+4) Run the container in background
 
    ```
    docker-compose -f docker-compose.yml up -d
@@ -34,14 +34,8 @@ Read more at https://daemon-technologies.github.io/docs/
    ```
    docker logs -f stacks-mining-docker_mining_server_1
    ```
-   
-6) Check logs of the mining bot container
 
-   ```
-   docker logs -f stacks-mining-docker_mining_bot_1
-   ```
-   
-7) Generate bitcoin and stacks wallet details
+6) Generate bitcoin and stacks wallet details
 
    ```
    docker run -i node:14-alpine npx @stacks/cli make_keychain -t 2>/dev/null
@@ -49,7 +43,7 @@ Read more at https://daemon-technologies.github.io/docs/
    
    Note down the details securely
    
-8) Check the Mining bot dashboard once it is up
+7) Check the Mining bot dashboard once it is up
    ```
    http://localhost:8000/
    ```
